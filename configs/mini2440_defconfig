@@ -41,3 +41,9 @@ BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="board/friendlyarm/mini2440/linux-2.6.39.4.c
 BR2_LINUX_KERNEL_SAME_AS_HEADERS=y
 BR2_LINUX_KERNEL_UIMAGE=y
 BR2_LINUX_KERNEL_PATCH="board/friendlyarm/mini2440/linux-2.6.39.4-patch/"
+
+#
+# Package Selection for the target
+#
+
+BR2_PACKAGE_OPENSSH=y
