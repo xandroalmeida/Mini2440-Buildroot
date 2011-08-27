@@ -1,0 +1,67 @@
+commit 27ffb38bd28040c37900ea7ad45421bfdfee6a43
+Author: Alexandro Dias de Almeida <xandroalmeida@gmail.com>
+Date:   Fri Aug 5 20:01:54 2011 -0300
+
+    From: Marek Belisko <marek.belisko@open-nandra.com>
+    Date: Fri, 18 Mar 2011 13:13:05 +0100
+    Subject: [PATCH 1/4] s3c2440: mini2440: Add support for new LCD panels.
+    
+    This patch add support for new mini2440 board LCD's:
+    3.5" TFT + TS (TD035STED4)
+    5.6" TFT (Innolux AT056TN52).
+    3.5" TFT + TS (SONY X35)
+    
+    Values overtaken from mini2440 kernel:
+    git://repo.or.cz/linux-2.6/mini2440.git
+    and https://github.com/a1ien/mini2440-linux-kernel
+    
+    Signed-off-by: Marek Belisko <marek.belisko@open-nandra.com>
+
+diff --git a/arch/arm/mach-s3c2440/mach-mini2440.c b/arch/arm/mach-s3c2440/mach-mini2440.c
+index fc2dc0b..9057d6b 100644
+--- a/arch/arm/mach-s3c2440/mach-mini2440.c
++++ b/arch/arm/mach-s3c2440/mach-mini2440.c
+@@ -167,6 +167,43 @@ static struct s3c2410fb_display mini2440_lcd_cfg[] __initdata = {
+ 		.lcdcon5	= (S3C2410_LCDCON5_FRM565 |
+ 				   S3C2410_LCDCON5_HWSWP),
+ 	},
++	[3] = {	/* mini2440 + 3.5" TFT + TS -- New model as Nov 2009 "T35" */
++		_LCD_DECLARE(
++			7,			/* The 3.5 is quite fast */
++			240, 21, 25, 6,		/* x timing */
++			320, 2, 4, 2,		/* y timing */
++			40),			/* refresh rate */
++		.lcdcon5	= (S3C2410_LCDCON5_FRM565 |
++				   S3C2410_LCDCON5_INVVLINE |
++				   S3C2410_LCDCON5_INVVFRAME |
++				   S3C2410_LCDCON5_INVVDEN |
++				   S3C2410_LCDCON5_PWREN),
++	},
++	[4] = { /* mini2440 + 5.6" TFT + touchscreen -- Innolux AT056TN52 */
++		/* be sure the "power" jumper is set accordingly ! */
++		_LCD_DECLARE(
++			10,			/* the 5.3" runs slower */
++			640, 41, 68, 22,	/* x timing */
++			480, 26, 6, 2,		/* y timing */
++			40),			/* refresh rate */
++		.lcdcon5	= (S3C2410_LCDCON5_FRM565 |
++				   S3C2410_LCDCON5_INVVLINE |
++				   S3C2410_LCDCON5_INVVFRAME |
++				   S3C2410_LCDCON5_PWREN),
++	},
++	[5] = { /* mini2440 + 3,5" TFT + touchscreen -- SONY X35 */
++		_LCD_DECLARE(
++			7,
++			240, 1, 26, 5,		/* x timing */
++			320, 1, 5, 9,		/* y timing */
++			60),			/* refresh rate */
++		.lcdcon5	= (S3C2410_LCDCON5_FRM565 |
++					S3C2410_LCDCON5_INVVDEN |
++					S3C2410_LCDCON5_INVVFRAME |
++					S3C2410_LCDCON5_INVVLINE |
++					S3C2410_LCDCON5_INVVCLK |
++					S3C2410_LCDCON5_HWSWP),
++	},
+ };
+ 
+ /* todo - put into gpio header */
