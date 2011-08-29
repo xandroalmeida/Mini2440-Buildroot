@@ -1,0 +1,16 @@
+#! /bin/sh
+
+case "$1" in
+	start|"")
+		echo -n "Initializing crontab... "
+		/usr/sbin/crond && echo " Ok"	
+		;;
+	stop)
+		echo -n "Stoping crontab... "
+		killall crond && echo " Ok"
+		;;
+	*)
+		echo "Usage: crontab {start|stop}" >&2
+		exit 1
+		;;
+esac
