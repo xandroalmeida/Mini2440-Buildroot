@@ -139,7 +139,7 @@ HOST_LIBGTK2_CONF_OPT = \
 		--disable-debug
 
 define HOST_LIBGTK2_PATCH_REDUCE_DEPENDENCIES_HOOK
- toolchain/patch-kernel.sh $(@D) $($(PKG)_DIR_PREFIX)/$(RAWNAME) host-*.patch
+ support/scripts/apply-patches.sh $(@D) $($(PKG)_DIR_PREFIX)/$(RAWNAME) host-*.patch
 endef
 
 HOST_LIBGTK2_POST_PATCH_HOOKS += HOST_LIBGTK2_PATCH_REDUCE_DEPENDENCIES_HOOK
@@ -152,5 +152,5 @@ define HOST_LIBGTK2_INSTALL_CMDS
  cp $(@D)/gtk/gtk-update-icon-cache $(HOST_DIR)/usr/bin
 endef
 
-$(eval $(call AUTOTARGETS,package,libgtk2))
-$(eval $(call AUTOTARGETS,package,libgtk2,host))
+$(eval $(call AUTOTARGETS))
+$(eval $(call AUTOTARGETS,host))

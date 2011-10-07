@@ -4,7 +4,7 @@
 #
 #############################################################
 
-MPD_VERSION = 0.16.2
+MPD_VERSION = 0.16.4
 MPD_SITE = http://$(BR2_SOURCEFORGE_MIRROR).dl.sourceforge.net/sourceforge/musicpd
 MPD_AUTORECONF = YES
 MPD_DEPENDENCIES = host-pkg-config libglib2
@@ -126,4 +126,4 @@ endef
 
 MPD_POST_INSTALL_TARGET_HOOKS += MPD_INSTALL_EXTRA_FILES
 
-$(eval $(call AUTOTARGETS,package/multimedia,mpd))
+$(eval $(call AUTOTARGETS))

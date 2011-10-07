@@ -13,7 +13,6 @@ DBUS_GLIB_CONF_ENV = ac_cv_have_abstract_sockets=yes \
 		have_abstract_sockets=yes
 
 DBUS_GLIB_CONF_OPT = --localstatedir=/var \
-		--program-prefix="" \
 		--disable-tests \
 		--disable-xml-docs \
 		--with-introspect-xml=$(DBUS_HOST_INTROSPECT) \
@@ -33,8 +32,8 @@ HOST_DBUS_GLIB_CONF_OPT = \
 		--disable-doxygen-docs \
 		--enable-asserts=yes
 
-$(eval $(call AUTOTARGETS,package,dbus-glib))
-$(eval $(call AUTOTARGETS,package,dbus-glib,host))
+$(eval $(call AUTOTARGETS))
+$(eval $(call AUTOTARGETS,host))
 
 # dbus-glib for the host
 DBUS_GLIB_HOST_BINARY:=$(HOST_DIR)/usr/bin/dbus-binding-tool

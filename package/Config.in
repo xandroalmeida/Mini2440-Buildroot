@@ -31,6 +31,7 @@ source "package/oprofile/Config.in"
 source "package/strace/Config.in"
 source "package/whetstone/Config.in"
 source "package/valgrind/Config.in"
+source "package/pv/Config.in"
 endmenu
 
 menu "Development tools"
@@ -191,7 +192,9 @@ source "package/memtester/Config.in"
 source "package/mtd/Config.in"
 source "package/ntfs-3g/Config.in"
 source "package/ntfsprogs/Config.in"
+source "package/openocd/Config.in"
 source "package/pciutils/Config.in"
+source "package/picocom/Config.in"
 source "package/rng-tools/Config.in"
 source "package/sdparm/Config.in"
 source "package/setserial/Config.in"
@@ -266,7 +269,7 @@ menu "Filesystem"
 source "package/gamin/Config.in"
 source "package/libconfig/Config.in"
 source "package/libconfuse/Config.in"
-source "package/fuse/Config.in"
+source "package/libfuse/Config.in"
 source "package/liblockfile/Config.in"
 source "package/libsysfs/Config.in"
 endmenu
@@ -337,6 +340,7 @@ source "package/libupnp/Config.in"
 endmenu
 
 menu "Other"
+source "package/fftw/Config.in"
 source "package/libargtable2/Config.in"
 source "package/argp-standalone/Config.in"
 source "package/libatomic_ops/Config.in"
@@ -351,6 +355,7 @@ source "package/libnspr/Config.in"
 source "package/liboil/Config.in"
 source "package/libsigc/Config.in"
 source "package/orc/Config.in"
+source "package/poco/Config.in"
 source "package/startup-notification/Config.in"
 endmenu
 
@@ -369,6 +374,7 @@ endmenu
 menu "JSON/XML"
 source "package/expat/Config.in"
 source "package/ezxml/Config.in"
+source "package/json-c/Config.in"
 source "package/libroxml/Config.in"
 source "package/libxml-parser-perl/Config.in"
 source "package/libxml2/Config.in"
@@ -389,6 +395,7 @@ menu "Networking applications"
 source "package/argus/Config.in"
 source "package/avahi/Config.in"
 source "package/axel/Config.in"
+source "package/bluez_utils/Config.in"
 if BR2_PACKAGE_BUSYBOX_SHOW_OTHERS
 source "package/boa/Config.in"
 endif
@@ -398,6 +405,7 @@ source "package/bridge-utils/Config.in"
 source "package/bwm-ng/Config.in"
 source "package/can-utils/Config.in"
 source "package/ctorrent/Config.in"
+source "package/cifs-utils/Config.in"
 source "package/cups/Config.in"
 if BR2_PACKAGE_BUSYBOX_SHOW_OTHERS
 source "package/dhcp/Config.in"
@@ -437,6 +445,7 @@ source "package/netsnmp/Config.in"
 source "package/netstat-nat/Config.in"
 source "package/nfs-utils/Config.in"
 source "package/ngircd/Config.in"
+source "package/ngrep/Config.in"
 source "package/ntp/Config.in"
 source "package/nuttcp/Config.in"
 source "package/olsr/Config.in"
@@ -485,6 +494,11 @@ source "package/ipkg/Config.in"
 if BR2_PACKAGE_BUSYBOX_SHOW_OTHERS
 source "package/rpm/Config.in"
 endif
+endmenu
+
+menu "Real-Time"
+source "package/xenomai/Config.in"
+source "package/rtai/Config.in"
 endmenu
 
 menu "Shell and utilities"

@@ -6,7 +6,6 @@
 XAPP_XMAN_VERSION:=1.0.3
 XAPP_XMAN_SOURCE:=xman-$(XAPP_XMAN_VERSION).tar.bz2
 XAPP_XMAN_SITE:=http://xorg.freedesktop.org/releases/individual/app
-XAPP_XMAN_AUTORECONF = NO
 XAPP_XMAN_INSTALL_TARGET = YES
 
 XAPP_XMAN_CONF_ENV = ac_cv_file__etc_man_conf=no \
@@ -15,4 +14,4 @@ XAPP_XMAN_CONF_ENV = ac_cv_file__etc_man_conf=no \
 
 XAPP_XMAN_CONF_OPT = --disable-IPv6
 
-$(eval $(call AUTOTARGETS,package/x11r7,xapp_xman))
+$(eval $(call AUTOTARGETS))

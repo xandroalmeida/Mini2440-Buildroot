@@ -30,6 +30,7 @@ endif
 # We just keep the convention of "host utility" for now
 HOST_BINUTILS_CONF_OPT = --disable-multilib --disable-werror \
 			--target=$(REAL_GNU_TARGET_NAME) \
+			--disable-shared --enable-static \
 			$(BR2_CONFIGURE_STAGING_SYSROOT) \
 			$(BINUTILS_EXTRA_CONFIG_OPTIONS)
 
@@ -51,5 +52,5 @@ define BINUTILS_INSTALL_TARGET_CMDS
 		DESTDIR=$(TARGET_DIR) install
 endef
 
-$(eval $(call AUTOTARGETS,package,binutils))
-$(eval $(call AUTOTARGETS,package,binutils,host))
+$(eval $(call AUTOTARGETS))
+$(eval $(call AUTOTARGETS,host))

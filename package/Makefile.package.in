@@ -55,6 +55,24 @@ define KCONFIG_DISABLE_OPT
        echo "# $(1) is not set" >> $(2)
 endef
 
+# Helper functions to determine the name of a package and its
+# directory from its makefile directory, using the $(MAKEFILE_LIST)
+# variable provided by make. This is used by the *TARGETS macros to
+# automagically find where the package is located. Note that the
+# pkgdir macro is carefully written to handle the case of the Linux
+# package, for which the package directory is an empty string.
+define pkgdir
+$(dir $(lastword $(MAKEFILE_LIST)))
+endef
+
+define pkgname
+$(lastword $(subst /, ,$(call pkgdir)))
+endef
+
+define pkgparentdir
+$(patsubst %$(call pkgname)/,%,$(call pkgdir))
+endef
+
 # Define extractors for different archive suffixes
 INFLATE.bz2  = $(BZCAT)
 INFLATE.gz   = $(ZCAT)
@@ -71,9 +89,10 @@ TERM_RESET := $(shell tput rmso)
 
 # Download method commands
 WGET:=$(call qstrip,$(BR2_WGET)) $(QUIET)
-SVN:=$(call qstrip,$(BR2_SVN)) $(QUIET)
-BZR:=$(call qstrip,$(BR2_BZR)) $(QUIET)
-GIT:=$(call qstrip,$(BR2_GIT)) $(QUIET)
+SVN:=$(call qstrip,$(BR2_SVN))
+BZR:=$(call qstrip,$(BR2_BZR))
+GIT:=$(call qstrip,$(BR2_GIT))
+LOCALFILES:=$(call qstrip,$(BR2_LOCALFILES))
 
 # Default spider mode is 'DOWNLOAD'. Other possible values are 'SOURCE_CHECK'
 # used by the _source-check target and 'SHOW_EXTERNAL_DEPS', used by the
@@ -86,18 +105,18 @@ DL_DIR:=$(TOPDIR)/dl
 endif
 
 ################################################################################
-# The DOWNLOAD_{GIT,SVN,BZR} helpers are in charge of getting a
+# The DOWNLOAD_{GIT,SVN,BZR,LOCALFILES} helpers are in charge of getting a
 # working copy of the source repository for their corresponding SCM,
 # checking out the requested version / commit / tag, and create an
 # archive out of it. DOWNLOAD_WGET is the normal wget-based download
 # mechanism.
 #
-# The SOURCE_CHECK_{GIT,SVN,BZR,WGET} helpers are in charge of simply
+# The SOURCE_CHECK_{GIT,SVN,BZR,WGET,LOCALFILES} helpers are in charge of simply
 # checking that the source is available for download. This can be used
 # to make sure one will be able to get all the sources needed for
 # one's build configuration.
 #
-# The SHOW_EXTERNAL_DEPS_{GIT,SVN,BZR,WGET} helpers simply output to
+# The SHOW_EXTERNAL_DEPS_{GIT,SVN,BZR,WGET,LOCALFILES} helpers simply output to
 # the console the names of the files that will be downloaded, or path
 # and revision of the source repositories, producing a list of all the
 # "external dependencies" of a given build configuration.
@@ -122,7 +141,7 @@ define SOURCE_CHECK_GIT
 endef
 
 define SHOW_EXTERNAL_DEPS_GIT
-  echo "$($(PKG)_SITE) [git: $($(PKG)_DL_VERSION)]"
+	echo $($(PKG)_SOURCE)
 endef
 
 
@@ -136,7 +155,7 @@ define SOURCE_CHECK_BZR
 endef
 
 define SHOW_EXTERNAL_DEPS_BZR
-	echo "$($(PKG)_SITE) [bzr: $($(PKG)_DL_VERSION)]"
+	echo $($(PKG)_SOURCE)
 endef
 
 
@@ -154,7 +173,7 @@ define SOURCE_CHECK_SVN
 endef
 
 define SHOW_EXTERNAL_DEPS_SVN
-  echo "$($(PKG)_SITE) [svn: $($(PKG)_DL_VERSION)]"
+  echo $($(PKG)_SOURCE)
 endef
 
 
@@ -169,6 +188,19 @@ endef
 
 define SHOW_EXTERNAL_DEPS_WGET
   echo $(2)
+endef
+
+define DOWNLOAD_LOCALFILES
+	test -e $(DL_DIR)/$($(PKG)_SOURCE) || \
+		$(LOCALFILES) $(call qstrip,$(subst file://,,$($(PKG)_SITE)))/$($(PKG)_SOURCE) $(DL_DIR)
+endef
+
+define SOURCE_CHECK_LOCALFILES
+  test -e $(call qstrip,$(subst file://,,$($(PKG)_SITE)))/$($(PKG)_SOURCE)
+endef
+
+define SHOW_EXTERNAL_DEPS_LOCALFILES
+  echo $($(PKG)_SITE)/$($(PKG)_SOURCE)
 endef
 
 ################################################################################
@@ -193,6 +225,7 @@ define DOWNLOAD
 			git) $($(DL_MODE)_GIT) && exit ;; \
 			svn) $($(DL_MODE)_SVN) && exit ;; \
 			bzr) $($(DL_MODE)_BZR) && exit ;; \
+			file) $($(DL_MODE)_LOCALFILES) && exit ;; \
 			*) $(call $(DL_MODE)_WGET,$(1),$(2)) && exit ;; \
 		esac ; \
 	fi ; \
@@ -251,6 +284,25 @@ $(BUILD_DIR)/%/.stamp_extracted:
 	$(foreach hook,$($(PKG)_POST_EXTRACT_HOOKS),$(call $(hook))$(sep))
 	$(Q)touch $@
 
+# Rsync the source directory if the <pkg>_OVERRIDE_SRCDIR feature is
+# used.
+$(BUILD_DIR)/%/.stamp_rsynced:
+	@$(call MESSAGE,"Syncing from source dir $(SRCDIR)")
+	@test -d $(SRCDIR) || (echo "ERROR: $(SRCDIR) does not exist" ; exit 1)
+	rsync -au $(SRCDIR)/ $(@D)
+	$(Q)touch $@
+
+# Handle the SOURCE_CHECK and SHOW_EXTERNAL_DEPS cases for rsynced
+# packages
+$(BUILD_DIR)/%/.stamp_rsync_sourced:
+ifeq ($(DL_MODE),SOURCE_CHECK)
+	test -d $(SRCDIR)
+else ifeq ($(DL_MODE),SHOW_EXTERNAL_DEPS)
+	echo "file://$(SRCDIR)"
+else
+	@true # Nothing to do to source a local package
+endif
+
 # Patch
 #
 # The RAWNAME variable is the lowercased package name, which allows to
@@ -259,15 +311,16 @@ $(BUILD_DIR)/%/.stamp_extracted:
 $(BUILD_DIR)/%/.stamp_patched: NAMEVER = $(RAWNAME)-$($(PKG)_VERSION)
 $(BUILD_DIR)/%/.stamp_patched:
 	@$(call MESSAGE,"Patching $($(PKG)_DIR_PREFIX)/$(RAWNAME)")
-	$(if $($(PKG)_PATCH),toolchain/patch-kernel.sh $(@D) $(DL_DIR) $($(PKG)_PATCH))
+	$(foreach hook,$($(PKG)_PRE_PATCH_HOOKS),$(call $(hook))$(sep))
+	$(if $($(PKG)_PATCH),support/scripts/apply-patches.sh $(@D) $(DL_DIR) $($(PKG)_PATCH))
 	$(Q)( \
 	if test -d $($(PKG)_DIR_PREFIX)/$(RAWNAME); then \
 	  if test "$(wildcard $($(PKG)_DIR_PREFIX)/$(RAWNAME)/$(NAMEVER)*.patch*)"; then \
-	    toolchain/patch-kernel.sh $(@D) $($(PKG)_DIR_PREFIX)/$(RAWNAME) $(NAMEVER)\*.patch $(NAMEVER)\*.patch.$(ARCH) || exit 1; \
+	    support/scripts/apply-patches.sh $(@D) $($(PKG)_DIR_PREFIX)/$(RAWNAME) $(NAMEVER)\*.patch $(NAMEVER)\*.patch.$(ARCH) || exit 1; \
 	  else \
-	    toolchain/patch-kernel.sh $(@D) $($(PKG)_DIR_PREFIX)/$(RAWNAME) $(RAWNAME)\*.patch $(RAWNAME)\*.patch.$(ARCH) || exit 1; \
+	    support/scripts/apply-patches.sh $(@D) $($(PKG)_DIR_PREFIX)/$(RAWNAME) $(RAWNAME)\*.patch $(RAWNAME)\*.patch.$(ARCH) || exit 1; \
 	    if test -d $($(PKG)_DIR_PREFIX)/$(RAWNAME)/$(NAMEVER); then \
-	      toolchain/patch-kernel.sh $(@D) $($(PKG)_DIR_PREFIX)/$(RAWNAME)/$(NAMEVER) \*.patch \*.patch.$(ARCH) || exit 1; \
+	      support/scripts/apply-patches.sh $(@D) $($(PKG)_DIR_PREFIX)/$(RAWNAME)/$(NAMEVER) \*.patch \*.patch.$(ARCH) || exit 1; \
 	    fi; \
 	  fi; \
 	fi; \
@@ -383,6 +436,10 @@ $(2)_BASE_NAME	=  $(1)-$$($(2)_VERSION)
 $(2)_DL_DIR	=  $$(DL_DIR)/$$($(2)_BASE_NAME)
 $(2)_DIR	=  $$(BUILD_DIR)/$$($(2)_BASE_NAME)
 
+ifneq ($$($(2)_OVERRIDE_SRCDIR),)
+$(2)_VERSION = custom
+endif
+
 ifndef $(2)_SOURCE
  ifdef $(3)_SOURCE
   $(2)_SOURCE = $($(3)_SOURCE)
@@ -415,6 +472,12 @@ ifndef $(2)_SITE_METHOD
  endif
 endif
 
+ifeq ($$($(2)_SITE_METHOD),local)
+ifeq ($$($(2)_OVERRIDE_SRCDIR),)
+$(2)_OVERRIDE_SRCDIR = $($(2)_SITE)
+endif
+endif
+
 $(2)_DEPENDENCIES		?=
 $(2)_INSTALL_STAGING		?= NO
 $(2)_INSTALL_IMAGES		?= NO
@@ -428,6 +491,8 @@ $(2)_TARGET_INSTALL_IMAGES =	$$($(2)_DIR)/.stamp_images_installed
 $(2)_TARGET_INSTALL_HOST =      $$($(2)_DIR)/.stamp_host_installed
 $(2)_TARGET_BUILD =		$$($(2)_DIR)/.stamp_built
 $(2)_TARGET_CONFIGURE =		$$($(2)_DIR)/.stamp_configured
+$(2)_TARGET_RSYNC =	        $$($(2)_DIR)/.stamp_rsynced
+$(2)_TARGET_RSYNC_SOURCE =      $$($(2)_DIR)/.stamp_rsync_sourced
 $(2)_TARGET_PATCH =		$$($(2)_DIR)/.stamp_patched
 $(2)_TARGET_EXTRACT =		$$($(2)_DIR)/.stamp_extracted
 $(2)_TARGET_SOURCE =		$$($(2)_DIR)/.stamp_downloaded
@@ -443,6 +508,7 @@ $(2)_EXTRACT_CMDS ?= \
 # post-steps hooks
 $(2)_POST_DOWNLOAD_HOOKS        ?=
 $(2)_POST_EXTRACT_HOOKS         ?=
+$(2)_PRE_PATCH_HOOKS            ?=
 $(2)_POST_PATCH_HOOKS           ?=
 $(2)_PRE_CONFIGURE_HOOKS        ?=
 $(2)_POST_CONFIGURE_HOOKS       ?=
@@ -487,20 +553,41 @@ $(1)-install-host:      $(1)-build $$($(2)_TARGET_INSTALL_HOST)
 $(1)-build:		$(1)-configure \
 			$$($(2)_TARGET_BUILD)
 
-$(1)-configure:		$(1)-patch \
+ifeq ($$($(2)_OVERRIDE_SRCDIR),)
+# In the normal case (no package override), the sequence of steps is
+#  source, by downloading
+#  depends
+#  extract
+#  patch
+#  configure
+$(1)-configure:		$(1)-patch $(1)-depends \
 			$$($(2)_TARGET_CONFIGURE)
 
 $(1)-patch:		$(1)-extract $$($(2)_TARGET_PATCH)
 
-$(1)-extract:		$(1)-depends \
+$(1)-extract:		$(1)-source \
 			$$($(2)_TARGET_EXTRACT)
 
-$(1)-depends:		$(1)-source $$($(2)_DEPENDENCIES)
+$(1)-depends:		$$($(2)_DEPENDENCIES)
+
+$(1)-source:		$$($(2)_TARGET_SOURCE)
+else
+# In the package override case, the sequence of steps
+#  source, by rsyncing
+#  depends
+#  configure
+$(1)-configure:		$(1)-depends \
+			$$($(2)_TARGET_CONFIGURE)
+
+$(1)-depends:		$(1)-rsync $$($(2)_DEPENDENCIES)
+
+$(1)-rsync:		$$($(2)_TARGET_RSYNC)
+
+$(1)-source:		$$($(2)_TARGET_RSYNC_SOURCE)
+endif
 
 $(1)-show-depends:
 			@echo $$($(2)_DEPENDENCIES)
-
-$(1)-source:		$$($(2)_TARGET_SOURCE)
 
 $(1)-uninstall:		$(1)-configure $$($(2)_TARGET_UNINSTALL)
 
@@ -508,6 +595,22 @@ $(1)-clean:		$(1)-uninstall \
 			$$($(2)_TARGET_CLEAN)
 
 $(1)-dirclean:		$$($(2)_TARGET_DIRCLEAN)
+
+$(1)-clean-for-rebuild:
+ifneq ($$($(2)_OVERRIDE_SRCDIR),)
+			rm -f $$($(2)_TARGET_RSYNC)
+endif
+			rm -f $$($(2)_TARGET_BUILD)
+			rm -f $$($(2)_TARGET_INSTALL_STAGING)
+			rm -f $$($(2)_TARGET_INSTALL_TARGET)
+			rm -f $$($(2)_TARGET_INSTALL_HOST)
+
+$(1)-rebuild:		$(1)-clean-for-rebuild all
+
+$(1)-clean-for-reconfigure: $(1)-clean-for-rebuild
+			rm -f $$($(2)_TARGET_CONFIGURE)
+
+$(1)-reconfigure:	$(1)-clean-for-reconfigure all
 
 # define the PKG variable for all targets, containing the
 # uppercase package variable prefix
@@ -517,6 +620,10 @@ $$($(2)_TARGET_INSTALL_IMAGES):		PKG=$(2)
 $$($(2)_TARGET_INSTALL_HOST):           PKG=$(2)
 $$($(2)_TARGET_BUILD):			PKG=$(2)
 $$($(2)_TARGET_CONFIGURE):		PKG=$(2)
+$$($(2)_TARGET_RSYNC):                  SRCDIR=$$($(2)_OVERRIDE_SRCDIR)
+$$($(2)_TARGET_RSYNC):                  PKG=$(2)
+$$($(2)_TARGET_RSYNC_SOURCE):		SRCDIR=$$($(2)_OVERRIDE_SRCDIR)
+$$($(2)_TARGET_RSYNC_SOURCE):		PKG=$(2)
 $$($(2)_TARGET_PATCH):			PKG=$(2)
 $$($(2)_TARGET_PATCH):			RAWNAME=$(patsubst host-%,%,$(1))
 $$($(2)_TARGET_EXTRACT):		PKG=$(2)
@@ -530,7 +637,7 @@ $$($(2)_TARGET_DIRCLEAN):		PKG=$(2)
 # kernel case, the bootloaders case, and the normal packages case.
 ifeq ($(1),linux)
 $(2)_KCONFIG_VAR = BR2_LINUX_KERNEL
-else ifeq ($(4),boot)
+else ifeq ($(4),boot/)
 $(2)_KCONFIG_VAR = BR2_TARGET_$(2)
 else
 $(2)_KCONFIG_VAR = BR2_PACKAGE_$(2)
@@ -556,18 +663,16 @@ endef # GENTARGETS_INNER
 ################################################################################
 # GENTARGETS -- the target generator macro for generic packages
 #
-# Argument 1 is the package directory prefix [mandatory]
-# Argument 2 is the lowercase package name   [mandatory]
-# Argument 3 is "target" or "host"           [optional, default: "target"]
+# Argument 1 is "target" or "host"           [optional, default: "target"]
 ################################################################################
 
 define GENTARGETS
-ifeq ($(3),host)
+ifeq ($(1),host)
 # In the case of host packages, turn the package name "pkg" into "host-pkg"
-$(call GENTARGETS_INNER,$(3)-$(2),$(call UPPERCASE,$(3)-$(2)),$(call UPPERCASE,$(2)),$(1),host)
+$(call GENTARGETS_INNER,$(1)-$(call pkgname),$(call UPPERCASE,$(1)-$(call pkgname)),$(call UPPERCASE,$(call pkgname)),$(call pkgparentdir),host)
 else
 # In the case of target packages, keep the package name "pkg"
-$(call GENTARGETS_INNER,$(2),$(call UPPERCASE,$(2)),$(call UPPERCASE,$(2)),$(1),target)
+$(call GENTARGETS_INNER,$(call pkgname),$(call UPPERCASE,$(call pkgname)),$(call UPPERCASE,$(call pkgname)),$(call pkgparentdir),target)
 endif
 endef
 

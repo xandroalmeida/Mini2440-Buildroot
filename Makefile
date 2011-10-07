@@ -32,12 +32,12 @@ export BR2_VERSION:=2011.11-git
 # absolute path
 TOPDIR:=$(shell pwd)
 CONFIG_CONFIG_IN=Config.in
-CONFIG=package/config
+CONFIG=support/kconfig
 DATE:=$(shell date +%Y%m%d)
 
 # Compute the full local version string so packages can use it as-is
 # Need to export it, so it can be got from environment in children (eg. mconf)
-export BR2_VERSION_FULL:=$(BR2_VERSION)$(shell $(TOPDIR)/scripts/setlocalversion)
+export BR2_VERSION_FULL:=$(BR2_VERSION)$(shell $(TOPDIR)/support/scripts/setlocalversion)
 
 noconfig_targets:=menuconfig nconfig gconfig xconfig config oldconfig randconfig \
 	defconfig %_defconfig savedefconfig allyesconfig allnoconfig silentoldconfig release \
@@ -193,7 +193,7 @@ unexport CFLAGS
 unexport CXXFLAGS
 unexport GREP_OPTIONS
 
-GNU_HOST_NAME:=$(shell package/gnuconfig/config.guess)
+GNU_HOST_NAME:=$(shell support/gnuconfig/config.guess)
 
 #############################################################
 #
@@ -307,6 +307,13 @@ else ifeq ($(BR2_TOOLCHAIN_EXTERNAL),y)
 include toolchain/toolchain-external.mk
 else ifeq ($(BR2_TOOLCHAIN_CTNG),y)
 include toolchain/toolchain-crosstool-ng.mk
+endif
+
+# Include the package override file if one has been provided in the
+# configuration.
+PACKAGE_OVERRIDE_FILE=$(call qstrip,$(BR2_PACKAGE_OVERRIDE_FILE))
+ifneq ($(PACKAGE_OVERRIDE_FILE),)
+-include $(PACKAGE_OVERRIDE_FILE)
 endif
 
 include package/*/*.mk
@@ -425,7 +432,7 @@ erase-fakeroots:
 
 target-finalize:
 ifeq ($(BR2_HAVE_DEVFILES),y)
-	( scripts/copy.sh $(STAGING_DIR) $(TARGET_DIR) )
+	( support/scripts/copy.sh $(STAGING_DIR) $(TARGET_DIR) )
 else
 	rm -rf $(TARGET_DIR)/usr/include $(TARGET_DIR)/usr/lib/pkgconfig $(TARGET_DIR)/usr/share/aclocal
 	find $(TARGET_DIR)/lib \( -name '*.a' -o -name '*.la' \) -print0 | xargs -0 rm -f
@@ -607,7 +614,7 @@ endif # ifeq ($(BR2_HAVE_DOT_CONFIG),y)
 # output directory.
 outputmakefile:
 ifeq ($(NEED_WRAPPER),y)
-	$(Q)$(TOPDIR)/scripts/mkmakefile $(TOPDIR) $(O)
+	$(Q)$(TOPDIR)/support/scripts/mkmakefile $(TOPDIR) $(O)
 endif
 
 clean:

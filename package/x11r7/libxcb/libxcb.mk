@@ -9,7 +9,6 @@ LIBXCB_SITE = http://xcb.freedesktop.org/dist/
 
 LIBXCB_INSTALL_STAGING = YES
 
-LIBXCB_AUTORECONF = NO
 LIBXCB_DEPENDENCIES = \
 	host-libxslt pthread-stubs xcb-proto xlib_libXdmcp xlib_libXau \
 	host-xcb-proto host-python
@@ -21,6 +20,6 @@ HOST_LIBXCB_DEPENDENCIES = \
 	host-libxslt host-pthread-stubs host-xcb-proto host-xlib_libXdmcp \
 	host-xlib_libXau host-python
 
-$(eval $(call AUTOTARGETS,package/x11r7,libxcb))
-$(eval $(call AUTOTARGETS,package/x11r7,libxcb,host))
+$(eval $(call AUTOTARGETS))
+$(eval $(call AUTOTARGETS,host))
 

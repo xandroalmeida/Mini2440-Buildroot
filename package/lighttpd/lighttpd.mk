@@ -11,7 +11,6 @@ LIGHTTPD_CONF_OPT = \
 	--libdir=/usr/lib/lighttpd \
 	--libexecdir=/usr/lib \
 	--localstatedir=/var \
-	--program-prefix="" \
 	$(if $(BR2_LARGEFILE),,--disable-lfs)
 
 ifeq ($(BR2_PACKAGE_LIGHTTPD_OPENSSL),y)
@@ -56,4 +55,4 @@ define LIGHTTPD_UNINSTALL_TARGET_CMDS
 	rm -rf $(TARGET_DIR)/usr/lib/lighttpd
 endef
 
-$(eval $(call AUTOTARGETS,package,lighttpd))
+$(eval $(call AUTOTARGETS))

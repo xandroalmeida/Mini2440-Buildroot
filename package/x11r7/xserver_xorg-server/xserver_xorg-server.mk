@@ -8,7 +8,6 @@ XSERVER_XORG_SERVER_VERSION = 1.7.5
 XSERVER_XORG_SERVER_SOURCE = xorg-server-$(XSERVER_XORG_SERVER_VERSION).tar.bz2
 XSERVER_XORG_SERVER_SITE = http://xorg.freedesktop.org/releases/individual/xserver
 XSERVER_XORG_SERVER_MAKE = $(MAKE1) # make install fails with parallel make
-XSERVER_XORG_SERVER_AUTORECONF = NO
 XSERVER_XORG_SERVER_INSTALL_STAGING = YES
 XSERVER_XORG_SERVER_INSTALL_STAGING_OPT = DESTDIR=$(STAGING_DIR) install install-data
 
@@ -153,4 +152,4 @@ else
 XSERVER_XORG_SERVER_CONF_OPT += --disable-glx
 endif
 
-$(eval $(call AUTOTARGETS,package/x11r7,xserver_xorg-server))
+$(eval $(call AUTOTARGETS))

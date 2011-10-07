@@ -4,7 +4,7 @@
 #
 #############################################################
 
-SQLITE_VERSION = 3070603
+SQLITE_VERSION = 3070800
 SQLITE_SOURCE = sqlite-autoconf-$(SQLITE_VERSION).tar.gz
 SQLITE_SITE = http://www.sqlite.org
 SQLITE_INSTALL_STAGING = YES
@@ -41,4 +41,4 @@ define SQLITE_UNINSTALL_STAGING_CMDS
 	rm -f $(STAGING_DIR)/usr/include/sqlite3*.h
 endef
 
-$(eval $(call AUTOTARGETS,package,sqlite))
+$(eval $(call AUTOTARGETS))

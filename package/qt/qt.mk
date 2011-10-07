@@ -12,7 +12,7 @@
 #
 ######################################################################
 
-QT_VERSION = 4.7.3
+QT_VERSION = 4.7.4
 QT_SOURCE  = qt-everywhere-opensource-src-$(QT_VERSION).tar.gz
 QT_SITE    = http://get.qt.nokia.com/qt/source
 
@@ -637,4 +637,4 @@ define QT_UNINSTALL_TARGET_CMDS
 	-rm $(TARGET_DIR)/usr/lib/libphonon.so.*
 endef
 
-$(eval $(call GENTARGETS,package,qt))
+$(eval $(call GENTARGETS))

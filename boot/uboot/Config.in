@@ -1,4 +1,4 @@
-menuconfig BR2_TARGET_UBOOT
+config BR2_TARGET_UBOOT
 	bool "U-Boot"
 	help
 	  Build "Das U-Boot" Boot Monitor
@@ -92,10 +92,9 @@ config BR2_TARGET_UBOOT_FORMAT_LDR
 endchoice
 
 menuconfig BR2_TARGET_UBOOT_NETWORK
-	bool "Network Settings"
-	default y
+	bool "Custom Network Settings"
 	help
-	  Network settings for U-boot
+	  Custom network settings for U-boot
 
 if BR2_TARGET_UBOOT_NETWORK
 

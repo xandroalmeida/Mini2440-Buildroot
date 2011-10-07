@@ -9,10 +9,9 @@ LIBARGTABLE2_SOURCE = argtable2-$(LIBARGTABLE2_VERSION).tar.gz
 LIBARGTABLE2_SITE = http://$(BR2_SOURCEFORGE_MIRROR).dl.sourceforge.net/sourceforge/argtable/
 
 LIBARGTABLE2_INSTALL_STAGING = YES
-LIBARGTABLE2_CONF_OPT= --program-prefix="" \
-		--disable-example \
+LIBARGTABLE2_CONF_OPT= --disable-example \
 		--disable-kernel-module \
 		--enable-lib \
 		--enable-util
 
-$(eval $(call AUTOTARGETS,package,libargtable2))
+$(eval $(call AUTOTARGETS))

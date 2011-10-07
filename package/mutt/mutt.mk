@@ -16,10 +16,10 @@ MUTT_AUTORECONF=YES
 
 define MUTT_APPLY_DEBIAN_PATCHES
         if [ -d $(@D)/debian/patches ]; then \
-                toolchain/patch-kernel.sh $(@D) $(@D)/debian/patches \*.patch; \
+                support/scripts/apply-patches.sh $(@D) $(@D)/debian/patches \*.patch; \
         fi
 endef
 
 MUTT_POST_PATCH_HOOKS += MUTT_APPLY_DEBIAN_PATCHES
 
-$(eval $(call AUTOTARGETS,package,mutt))
+$(eval $(call AUTOTARGETS))

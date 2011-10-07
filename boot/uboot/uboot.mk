@@ -52,7 +52,7 @@ endef
 
 ifneq ($(call qstrip,$(BR2_TARGET_UBOOT_CUSTOM_PATCH_DIR)),)
 define UBOOT_APPLY_CUSTOM_PATCHES
-	toolchain/patch-kernel.sh $(@D) $(BR2_TARGET_UBOOT_CUSTOM_PATCH_DIR) \
+	support/scripts/apply-patches.sh $(@D) $(BR2_TARGET_UBOOT_CUSTOM_PATCH_DIR) \
 		uboot-$(UBOOT_VERSION)-\*.patch
 endef
 
@@ -88,7 +88,7 @@ define UBOOT_INSTALL_IMAGES_CMDS
 	cp -dpf $(@D)/$(UBOOT_BIN) $(BINARIES_DIR)/
 endef
 
-$(eval $(call GENTARGETS,boot,uboot))
+$(eval $(call GENTARGETS))
 
 ifeq ($(BR2_TARGET_UBOOT),y)
 # we NEED a board name unless we're at make source
