@@ -4,7 +4,7 @@
 #
 #############################################################
 
-MPD_VERSION = 0.16.4
+MPD_VERSION = 0.16.6
 MPD_SITE = http://$(BR2_SOURCEFORGE_MIRROR).dl.sourceforge.net/sourceforge/musicpd
 MPD_AUTORECONF = YES
 MPD_DEPENDENCIES = host-pkg-config libglib2
@@ -20,6 +20,11 @@ endif
 ifeq ($(BR2_PACKAGE_MPD_AO),y)
 MPD_DEPENDENCIES += libao
 MPD_CONF_OPT += --enable-ao
+endif
+
+ifeq ($(BR2_PACKAGE_MPD_PULSEAUDIO),y)
+MPD_DEPENDENCIES += pulseaudio
+MPD_CONF_OPT += --enable-pulse
 endif
 
 ifeq ($(BR2_PACKAGE_MPD_BZIP2),y)

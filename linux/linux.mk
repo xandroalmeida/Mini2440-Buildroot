@@ -18,9 +18,11 @@ LINUX_SOURCE = linux-$(LINUX_VERSION).tar.bz2
 # In X.Y.Z, get X and Y. We replace dots and dashes by spaces in order
 # to use the $(word) function. We support versions such as 3.1,
 # 2.6.32, 2.6.32-rc1, 3.0-rc6, etc.
-LINUX_VERSION_MAJOR = $(word 1,$(subst ., ,$(subst -, ,$(LINUX_VERSION))))
-LINUX_VERSION_MINOR = $(word 2,$(subst ., ,$(subst -, ,$(LINUX_VERSION))))
-LINUX_SITE = $(BR2_KERNEL_MIRROR)/linux/kernel/v$(LINUX_VERSION_MAJOR).$(LINUX_VERSION_MINOR)/
+ifeq ($(findstring x2.6.,x$(LINUX_VERSION)),x2.6.)
+LINUX_SITE = $(BR2_KERNEL_MIRROR)/linux/kernel/v2.6/
+else
+LINUX_SITE = $(BR2_KERNEL_MIRROR)/linux/kernel/v3.x/
+endif
 # release candidates are in testing/ subdir
 ifneq ($(findstring -rc,$(LINUX_VERSION)),)
 LINUX_SITE := $(LINUX_SITE)testing/
@@ -63,6 +65,8 @@ else ifeq ($(BR2_LINUX_KERNEL_VMLINUX_BIN),y)
 LINUX_IMAGE_NAME=vmlinux.bin
 else ifeq ($(BR2_LINUX_KERNEL_VMLINUX),y)
 LINUX_IMAGE_NAME=vmlinux
+else ifeq ($(BR2_LINUX_KERNEL_VMLINUZ),y)
+LINUX_IMAGE_NAME=vmlinuz
 endif
 endif
 
@@ -79,6 +83,8 @@ KERNEL_ARCH_PATH=$(LINUX_DIR)/arch/$(KERNEL_ARCH)
 endif
 
 ifeq ($(BR2_LINUX_KERNEL_VMLINUX),y)
+LINUX_IMAGE_PATH=$(LINUX_DIR)/$(LINUX_IMAGE_NAME)
+else ifeq ($(BR2_LINUX_KERNEL_VMLINUZ),y)
 LINUX_IMAGE_PATH=$(LINUX_DIR)/$(LINUX_IMAGE_NAME)
 else
 ifeq ($(KERNEL_ARCH),avr32)
@@ -189,6 +195,17 @@ linux-menuconfig linux-xconfig linux-gconfig linux-nconfig linux26-menuconfig li
 linux-savedefconfig linux26-savedefconfig: dirs $(LINUX_DIR)/.stamp_configured
 	$(MAKE) $(LINUX_MAKE_FLAGS) -C $(LINUX_DIR) \
 		$(subst linux-,,$(subst linux26-,,$@))
+
+ifeq ($(BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG),y)
+linux-update-config linux26-update-config: $(LINUX_DIR)/.config
+	cp -f $(LINUX_DIR)/.config $(BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE)
+
+linux-update-defconfig linux26-update-defconfig: linux-savedefconfig
+	cp -f $(LINUX_DIR)/defconfig $(BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE)
+else
+linux-update-config linux26-update-config: ;
+linux-update-defconfig linux26-update-defconfig: ;
+endif
 
 # Support for rebuilding the kernel after the cpio archive has
 # been generated in $(BINARIES_DIR)/rootfs.cpio.

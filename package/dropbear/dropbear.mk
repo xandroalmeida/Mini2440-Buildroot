@@ -4,8 +4,7 @@
 #
 #############################################################
 
-DROPBEAR_VERSION = 0.53.1
-DROPBEAR_SOURCE = dropbear-$(DROPBEAR_VERSION).tar.gz
+DROPBEAR_VERSION = 2011.54
 DROPBEAR_SITE = http://matt.ucc.asn.au/dropbear/releases
 DROPBEAR_TARGET_BINS = dbclient dropbearkey dropbearconvert scp ssh
 DROPBEAR_MAKE =	$(MAKE) MULTI=1 SCPPROGRESS=1 \
@@ -44,6 +43,14 @@ DROPBEAR_CONF_OPT += --disable-zlib
 else
 DROPBEAR_POST_EXTRACT_HOOKS += DROPBEAR_BUILD_FEATURED
 DROPBEAR_DEPENDENCIES += zlib
+endif
+
+ifneq ($(BR2_PACKAGE_DROPBEAR_WTMP),y)
+DROPBEAR_CONF_OPT += --disable-wtmp
+endif
+
+ifneq ($(BR2_PACKAGE_DROPBEAR_LASTLOG),y)
+DROPBEAR_CONF_OPT += --disable-lastlog
 endif
 
 define DROPBEAR_INSTALL_TARGET_CMDS

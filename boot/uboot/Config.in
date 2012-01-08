@@ -12,24 +12,23 @@ config BR2_TARGET_UBOOT_BOARDNAME
 
 choice
 	prompt "U-Boot Version"
-	default BR2_TARGET_UBOOT_2011_06
+	default BR2_TARGET_UBOOT_2011_12
 	help
 	  Select the specific U-Boot version you want to use
 
+config BR2_TARGET_UBOOT_2011_12
+	bool "2011.12"
+
+config BR2_TARGET_UBOOT_2011_09
+	bool "2011.09"
+
 config BR2_TARGET_UBOOT_2011_06
 	bool "2011.06"
+	depends on BR2_DEPRECATED
 
 config BR2_TARGET_UBOOT_2011_03
 	bool "2011.03"
-
-config BR2_TARGET_UBOOT_2010_12
-	bool "2010.12"
-
-config BR2_TARGET_UBOOT_2010_09
-	bool "2010.09"
-
-config BR2_TARGET_UBOOT_2010_06
-	bool "2010.06"
+	depends on BR2_DEPRECATED
 
 config BR2_TARGET_UBOOT_CUSTOM_TARBALL
 	bool "Custom tarball"
@@ -48,11 +47,10 @@ endif
 
 config BR2_TARGET_UBOOT_VERSION
 	string
+	default "2011.12"	if BR2_TARGET_UBOOT_2011_12
+	default "2011.09"	if BR2_TARGET_UBOOT_2011_09
 	default "2011.06"	if BR2_TARGET_UBOOT_2011_06
 	default "2011.03"	if BR2_TARGET_UBOOT_2011_03
-	default "2010.12"	if BR2_TARGET_UBOOT_2010_12
-	default "2010.09"	if BR2_TARGET_UBOOT_2010_09
-	default "2010.06"	if BR2_TARGET_UBOOT_2010_06
 	default "custom"	if BR2_TARGET_UBOOT_CUSTOM_TARBALL
 	default $BR2_TARGET_UBOOT_CUSTOM_GIT_VERSION if BR2_TARGET_UBOOT_CUSTOM_GIT
 
@@ -61,7 +59,7 @@ config BR2_TARGET_UBOOT_CUSTOM_PATCH_DIR
 	help
 	  If your board requires custom patches, add the path to the
 	  directory containing the patches here. The patches must be
-	  named u-boot-<version>-<something>.patch.
+	  named uboot-<version>-<something>.patch.
 
 	  Most users may leave this empty
 
@@ -80,6 +78,9 @@ choice
 
 config BR2_TARGET_UBOOT_FORMAT_BIN
 	bool "u-boot.bin"
+
+config BR2_TARGET_UBOOT_FORMAT_NAND_BIN
+	bool "u-boot-nand.bin"
 
 config BR2_TARGET_UBOOT_FORMAT_KWB
 	depends on BR2_arm

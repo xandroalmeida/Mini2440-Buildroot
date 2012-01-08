@@ -9,7 +9,6 @@ HOSTAPD_SITE = http://hostap.epitest.fi/releases
 HOSTAPD_SUBDIR = hostapd
 HOSTAPD_CONFIG = $(HOSTAPD_DIR)/$(HOSTAPD_SUBDIR)/.config
 HOSTAPD_DEPENDENCIES = libnl
-
 HOSTAPD_LDFLAGS = $(TARGET_LDFLAGS)
 
 # libnl needs -lm (for rint) if linking statically
@@ -19,6 +18,7 @@ endif
 
 define HOSTAPD_LIBNL_CONFIG
 	echo "CONFIG_LIBNL20=y" >>$(HOSTAPD_CONFIG)
+	echo "CFLAGS += -I$(STAGING_DIR)/usr/include/libnl3/" >>$(HOSTAPD_CONFIG)
 endef
 
 define HOSTAPD_CRYPTO_CONFIG

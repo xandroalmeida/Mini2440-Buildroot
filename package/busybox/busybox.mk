@@ -31,7 +31,9 @@ endif
 # If mdev will be used for device creation enable it and copy S10mdev to /etc/init.d
 ifeq ($(BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_MDEV),y)
 define BUSYBOX_INSTALL_MDEV_SCRIPT
-	install -m 0755 package/busybox/S10mdev $(TARGET_DIR)/etc/init.d
+	[ -f $(TARGET_DIR)/etc/init.d/S10mdev ] || \
+		install -D -m 0755 package/busybox/S10mdev \
+			$(TARGET_DIR)/etc/init.d/S10mdev
 endef
 define BUSYBOX_INSTALL_MDEV_CONF
 	[ -f $(TARGET_DIR)/etc/mdev.conf ] || \
@@ -129,8 +131,9 @@ endif
 
 define BUSYBOX_INSTALL_LOGGING_SCRIPT
 	if grep -q CONFIG_SYSLOGD=y $(@D)/.config; then \
-		$(INSTALL) -m 0755 -D package/busybox/S01logging \
-			$(TARGET_DIR)/etc/init.d/S01logging; \
+		[ -f $(TARGET_DIR)/etc/init.d/S01logging ] || \
+			$(INSTALL) -m 0755 -D package/busybox/S01logging \
+				$(TARGET_DIR)/etc/init.d/S01logging; \
 	else rm -f $(TARGET_DIR)/etc/init.d/S01logging; fi
 endef
 
@@ -138,8 +141,6 @@ endef
 BUSYBOX_POST_EXTRACT_HOOKS += BUSYBOX_COPY_CONFIG
 
 define BUSYBOX_CONFIGURE_CMDS
-	$(BUSYBOX_SET_SYSKLOGD)
-	$(BUSYBOX_SET_BB_PWD)
 	$(BUSYBOX_SET_LARGEFILE)
 	$(BUSYBOX_SET_IPV6)
 	$(BUSYBOX_SET_RPC)
@@ -184,5 +185,5 @@ busybox-menuconfig busybox-xconfig busybox-gconfig: busybox-patch
 	rm -f $(BUSYBOX_DIR)/.stamp_built
 	rm -f $(BUSYBOX_DIR)/.stamp_target_installed
 
-busybox-update:
+busybox-update-config:
 	cp -f $(BUSYBOX_BUILD_CONFIG) $(BUSYBOX_CONFIG_FILE)
