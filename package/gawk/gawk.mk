@@ -4,7 +4,7 @@
 #
 #############################################################
 
-GAWK_VERSION = 4.0.0
+GAWK_VERSION = 4.0.1
 GAWK_SITE = $(BR2_GNU_MIRROR)/gawk
 GAWK_TARGET_BINS = awk gawk igawk pgawk
 
@@ -12,6 +12,9 @@ GAWK_TARGET_BINS = awk gawk igawk pgawk
 ifeq ($(BR2_PACKAGE_BUSYBOX),y)
 GAWK_DEPENDENCIES += busybox
 endif
+
+# we don't have a host-busybox
+HOST_GAWK_DEPENDENCIES =
 
 define GAWK_CREATE_SYMLINK
 	ln -sf /usr/bin/gawk $(TARGET_DIR)/usr/bin/awk
