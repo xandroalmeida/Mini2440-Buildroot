@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+# Starts wpa_suplicant.
+#
+
+# Make sure the wpa_supplicant progam exists
+[ -f /usr/sbin/wpa_supplicant ] || exit 0
+
+start() {
+ 	echo -n "Starting wpa_supplicant..."
+	wpa_supplicant -c /etc/wpa_supplicant.conf -i wlan0 -B -P/var/run/wpa_supplicant.pid	
+	echo "OK"
+}
+stop() {
+	echo -n "Stopping : wpa_supplicant..."
+	kill `cat /var/run/wpa_supplicant.pid`
+	echo "OK"
+}
+restart() {
+	stop
+	start
+}
+
+case "$1" in
+  start)
+  	start
+	;;
+  stop)
+  	stop
+	;;
+  restart|reload)
+  	restart
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit $?
+

@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+# Start udhcpc.
+#
+
+# Make sure the wpa_supplicant progam exists
+[ -f /sbin/udhcpc ] || exit 0
+
+start() {
+ 	echo -n "Starting udhcpc..."
+	udhcpc -i wlan0 -b -p/var/run/udhcpc.pid -S	
+	echo "OK"
+}
+stop() {
+	echo -n "Stopping : udhcpc..."
+	kill `cat /var/run/udhcpc.pid`
+	echo "OK"
+}
+restart() {
+	stop
+	start
+}
+
+case "$1" in
+  start)
+  	start
+	;;
+  stop)
+  	stop
+	;;
+  restart|reload)
+  	restart
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit $?
+
+
