@@ -1,0 +1,33 @@
+commit ed93fe949d3d7321f27c0d72675c4265cf464dfa
+Author: Alexandro Dias de Almeida <xandroalmeida@gmail.com>
+Date:   Sat Aug 6 14:30:43 2011 -0300
+
+    Denis Kuzmenko <dart [at] solonet>
+    LCD-W35i support for Mini2440 development board
+    
+    Solution found at http://www.gossamer-threads.com/lists/linux/kernel/1393616
+
+diff --git a/arch/arm/mach-s3c2440/mach-mini2440.c b/arch/arm/mach-s3c2440/mach-mini2440.c
+index d31aed2..97c0543 100644
+--- a/arch/arm/mach-s3c2440/mach-mini2440.c
++++ b/arch/arm/mach-s3c2440/mach-mini2440.c
+@@ -205,6 +205,19 @@ static struct s3c2410fb_display mini2440_lcd_cfg[] __initdata = {
+ 					S3C2410_LCDCON5_INVVCLK |
+ 					S3C2410_LCDCON5_HWSWP),
+ 	},
++	[6] = { /* mini2440 + 3,5" TFT + touchscreen -- W35 (LQ035Q1DGo6) */
++		_LCD_DECLARE(
++			7,
++			320, 68, 66, 4,		/* x timing */
++			240, 4, 4, 9,		/* y timing */
++			60),			/* refresh rate */
++		.lcdcon5	= (S3C2410_LCDCON5_FRM565 |
++					S3C2410_LCDCON5_INVVDEN |
++					S3C2410_LCDCON5_INVVFRAME |
++					S3C2410_LCDCON5_INVVLINE |
++					S3C2410_LCDCON5_INVVCLK |
++					S3C2410_LCDCON5_HWSWP),
++	},
+ };
+ 
+ /* todo - put into gpio header */
