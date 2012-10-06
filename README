@@ -11,8 +11,11 @@ tftp 0x31000000 uImage;nand erase kernel;nand write.e 0x31000000 kernel ${filesi
 
 tftp 0x31000000 rootfs.jffs2;nand erase root;nand write.jffs2 0x31000000 root ${filesize}
 
-setenv bootargs 'console=ttySAC0,115200 root=/dev/mtdblock3 rootfstype=jffs2 mini2440=6tb' ;saveenv
+setenv bootargs 'console=ttySAC0,115200 root=/dev/mtdblock3 rootfstype=jffs2 mini2440=6tb user_debug=28' ;saveenv
 
 Howto configure the U-Boot see http://www.sergioprado.org/2010/08/30/mini2440-linux-com-u-boot-e-emdebian/
 
+To configure the wireless USB
 
+#wpa_passphrase linksys_15068 xxxxx >> /etc/wpa_supplicant.conf
+#wpa_supplicant -c /etc/wpa_supplicant.conf -i wlan0
