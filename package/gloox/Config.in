@@ -1,0 +1,7 @@
+config BR2_PACKAGE_GLOOX
+        bool "gloox"
+        help
+          gloox is a rock-solid, full-featured Jabber/XMPP client library, 
+          written in clean ANSI C++.
+
+          http://camaya.net/gloox/
