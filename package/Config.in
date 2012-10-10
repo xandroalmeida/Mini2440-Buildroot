@@ -288,6 +288,7 @@ endmenu
 endif
 source "package/ruby/Config.in"
 source "package/tcl/Config.in"
+source "package/jamvm/Config.in"
 endmenu
 
 menu "Libraries"
