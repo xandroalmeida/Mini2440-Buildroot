@@ -1,10 +1,10 @@
 config BR2_PACKAGE_JAMVM
         bool "JamVM"
-	depends on BR2_PACKAGE_GNUCLASSPATH
+	depends on BR2_PACKAGE_GNUCLASSPATH && BR2_PACKAGE_ZLIB
         help
           JamVM is a new Java Virtual Machine which conforms to the 
           JVM specification version 2 (blue book).
 
           http://jamvm.sourceforge.net/
-comment "gnuclasspath requires BR2_PACKAGE_GNUCLASSPATH package"
-        depends on !BR2_PACKAGE_GNUCLASSPATH
+comment "gnuclasspath requires BR2_PACKAGE_GNUCLASSPATH and BR2_PACKAGE_ZLIB package"
+        depends on !(BR2_PACKAGE_GNUCLASSPATH && BR2_PACKAGE_ZLIB)

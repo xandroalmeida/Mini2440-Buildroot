@@ -11,7 +11,15 @@ tftp 0x31000000 uImage;nand erase kernel;nand write.e 0x31000000 kernel ${filesi
 
 tftp 0x31000000 rootfs.jffs2;nand erase root;nand write.jffs2 0x31000000 root ${filesize}
 
+
 setenv bootargs 'console=ttySAC0,115200 root=/dev/mtdblock3 rootfstype=jffs2 mini2440=6tb user_debug=28' ;saveenv
+
+To boot from mmc
+
+http://bill.station51.net/index.php?post/2010/01/30/HOWTO%3A-Booting-from-SD-card-using-U-Boot
+
+setenv bootcmd mmcinit \; ext2load mmc 0:2 0x31000000 uImage \; bootm 0x31000000
+setenv bootargs 'console=ttySAC0,115200 mini2440=6tb user_debug=28' rootfstype=ext2 root=/dev/mmcblk0p3 rw rootwait ;saveenv
 
 Howto configure the U-Boot see http://www.sergioprado.org/2010/08/30/mini2440-linux-com-u-boot-e-emdebian/
 
