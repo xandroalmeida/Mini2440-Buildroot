@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 JAMVM_VERSION = 1.5.4
 JAMVM_SITE = http://downloads.sourceforge.net/project/jamvm/jamvm/JamVM%20$(JAMVM_VERSION)
 JAMVM_DEPENDENCIES = zlib classpath
