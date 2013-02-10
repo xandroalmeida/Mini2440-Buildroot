@@ -4,7 +4,7 @@
 #
 #############################################################
 
-SAMBA_VERSION = 3.6.8
+SAMBA_VERSION = 3.6.12
 SAMBA_SITE = http://ftp.samba.org/pub/samba/stable
 SAMBA_SUBDIR = source3
 SAMBA_INSTALL_STAGING = YES
@@ -51,7 +51,7 @@ SAMBA_CONF_OPT = \
 	\
 	--without-cluster-support \
 	--without-dnsupdate \
-	$(if $(BR2_INET_RPC),--with-sys-quotas,--without-sys-quotas) \
+	--with-sys-quotas \
 	--without-ads \
 	--without-ldap \
 	--with-included-iniparser \
