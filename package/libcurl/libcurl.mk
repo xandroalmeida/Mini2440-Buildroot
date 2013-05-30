@@ -10,7 +10,13 @@ LIBCURL_SITE = http://curl.haxx.se/download
 LIBCURL_LICENSE = ICS
 LIBCURL_LICENSE_FILES = COPYING
 LIBCURL_INSTALL_STAGING = YES
-LIBCURL_CONF_OPT = --disable-verbose --disable-manual --enable-hidden-symbols
+
+# We disable NTLM support because it uses fork(), which doesn't work
+# on non-MMU platforms. Moreover, this authentication method is
+# probably almost never used. See
+# http://curl.haxx.se/docs/manpage.html#--ntlm.
+LIBCURL_CONF_OPT = --disable-verbose --disable-manual \
+	--enable-hidden-symbols --disable-ntlm-wb
 LIBCURL_CONFIG_SCRIPTS = curl-config
 
 ifeq ($(BR2_PACKAGE_OPENSSL),y)
@@ -21,7 +27,9 @@ LIBCURL_CONF_ENV += ac_cv_lib_crypto_CRYPTO_lock=yes
 # Fix it by setting LD_LIBRARY_PATH to something sensible so those libs
 # are found first.
 LIBCURL_CONF_ENV += LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:/lib:/usr/lib
-LIBCURL_CONF_OPT += --with-ssl=$(STAGING_DIR)/usr --with-random=/dev/urandom
+LIBCURL_CONF_OPT += --with-ssl=$(STAGING_DIR)/usr \
+	--with-random=/dev/urandom \
+	--with-ca-path=/etc/ssl/certs
 else
 LIBCURL_CONF_OPT += --without-ssl
 endif
